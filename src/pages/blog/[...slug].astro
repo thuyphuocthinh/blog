@@ -12,9 +12,20 @@ export async function getStaticPaths() {
 type Props = CollectionEntry<'blog'>;
 
 const post = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
+
+// Find related posts
+const allPosts = await getCollection('blog');
+const relatedPosts = allPosts
+	.filter(
+		(p) =>
+			p.id !== post.id &&
+			(p.data.category === post.data.category ||
+				p.data.tags?.some((t) => post.data.tags?.includes(t)))
+	)
+	.slice(0, 3);
 ---
 
-<BlogPost {...post.data}>
+<BlogPost {...post.data} headings={headings} relatedPosts={relatedPosts}>
 	<Content />
 </BlogPost>
