@@ -15,19 +15,44 @@ const posts = (await getCollection('blog')).sort(
 <!doctype html>
 <html lang="en">
 	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<BaseHead title={`Blog - ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
 	</head>
 	<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300 min-h-screen flex flex-col">
 		<Header />
 		<main class="flex-grow w-full max-w-5xl mx-auto px-4 py-12">
 			<section>
-				<h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-8">All Posts</h1>
-				<ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+				<div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+                    <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">All Posts</h1>
+                    
+                    <div class="flex items-center gap-3">
+                        <select id="category-filter" class="cursor-pointer bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-3 py-2 text-sm outline-none">
+                            <option value="all">All Category</option>
+                            <option value="frontend">Frontend</option>
+                            <option value="backend">Backend</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="dsa">DSA</option>
+                            <option value="system design">System Design</option>
+                            <option value="database">Database</option>
+                        </select>
+                        
+                        <select id="tag-filter" class="cursor-pointer bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-3 py-2 text-sm outline-none">
+                            <option value="all">All Tags</option>
+                            <option value="frontend">Frontend</option>
+                            <option value="backend">Backend</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="dsa">DSA</option>
+                            <option value="system design">System Design</option>
+                            <option value="database">Database</option>
+                        </select>
+                    </div>
+                </div>
+
+				<ul id="posts-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 					{
 						posts.map((post) => (
-							<li class="group">
-								<a href={`/blog/${post.id}/`} class="block h-full bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl dark:shadow-none border border-slate-200 dark:border-slate-700 transition-all duration-300 hover:-translate-y-1">
-									<div class="aspect-video w-full overflow-hidden">
+							<li class="group post-item" data-category={post.data.category || ''} data-tags={post.data.tags ? post.data.tags.join(',') : ''}>
+								<a href={`/blog/${post.id}/`} class="block h-full bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl dark:shadow-none border border-slate-200 dark:border-slate-700 transition-all duration-300 hover:-translate-y-1 flex flex-col">
+									<div class="aspect-video w-full overflow-hidden shrink-0">
 										{post.data.heroImage ? (
 											<Image 
                                                 width={720} 
@@ -37,29 +62,181 @@ const posts = (await getCollection('blog')).sort(
                                                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
                                             />
 										) : (
-                                            <div class="w-full h-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                                            <div class="w-full h-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center transition-transform duration-500 group-hover:scale-105">
                                                 <span class="text-slate-400">No Image</span>
                                             </div>
                                         )}
 									</div>
-									<div class="p-6">
-										<p class="text-sm font-medium text-blue-600 dark:text-blue-400 mb-2">
-											<FormattedDate date={post.data.pubDate} />
-										</p>
-										<h4 class="text-xl font-bold text-slate-900 dark:text-white leading-tight mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+									<div class="p-6 flex-grow flex flex-col">
+                                        <div class="flex flex-wrap gap-2 mb-3">
+                                            {post.data.category && (
+                                                <span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 text-xs font-semibold rounded capitalize">
+                                                    {post.data.category}
+                                                </span>
+                                            )}
+                                            {post.data.tags && post.data.tags.map(tag => (
+                                                <span class="px-2 py-0.5 bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300 text-xs rounded lowercase">
+                                                    #{tag}
+                                                </span>
+                                            ))}
+                                        </div>
+
+										<h4 class="text-xl font-bold text-slate-900 dark:text-white leading-tight mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
                                             {post.data.title}
                                         </h4>
-										<p class="text-slate-600 dark:text-slate-400 text-sm line-clamp-3">
+										<p class="text-slate-600 dark:text-slate-400 text-sm line-clamp-3 mb-4">
 											{post.data.description}
 										</p>
+                                        <div class="mt-auto text-xs font-medium text-slate-400 dark:text-slate-500">
+											<FormattedDate date={post.data.pubDate} />
+										</div>
 									</div>
 								</a>
 							</li>
 						))
 					}
 				</ul>
+
+				<div id="no-data-message" class="hidden flex-col items-center justify-center py-20 text-slate-500 dark:text-slate-400">
+					<svg class="w-16 h-16 mb-4 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+					</svg>
+					<h3 class="text-xl font-semibold mb-1 text-slate-700 dark:text-slate-200">Không tìm thấy bài viết nào</h3>
+					<p class="text-sm">Vui lòng thử chọn một Thể loại hoặc Tag khác.</p>
+				</div>
+                
+                <div class="mt-12 flex justify-center">
+					<button id="load-more-btn" class="hidden px-6 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-medium rounded-lg shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 cursor-pointer">
+						Xem thêm bài viết
+					</button>
+				</div>
 			</section>
 		</main>
 		<Footer />
+
+        <script is:inline>
+            document.addEventListener("DOMContentLoaded", () => {
+                const categoryFilter = document.getElementById('category-filter');
+                const tagFilter = document.getElementById('tag-filter');
+                const posts = document.querySelectorAll('.post-item');
+                const noDataMessage = document.getElementById('no-data-message');
+                const loadMoreBtn = document.getElementById('load-more-btn');
+
+                const ITEMS_PER_PAGE = 6;
+                let currentlyShown = ITEMS_PER_PAGE;
+
+                function updateUrlParams(category, tag) {
+                    const url = new URL(window.location);
+                    if (category && category !== 'all') {
+                        url.searchParams.set('category', category);
+                    } else {
+                        url.searchParams.delete('category');
+                    }
+                    
+                    if (tag && tag !== 'all') {
+                        url.searchParams.set('tags', tag);
+                    } else {
+                        url.searchParams.delete('tags');
+                    }
+                    
+                    window.history.replaceState({}, '', url);
+                }
+
+                function getMatchedPosts() {
+                    const selectedCategory = categoryFilter.value.toLowerCase();
+                    const selectedTag = tagFilter.value.toLowerCase();
+                    const matched = [];
+
+                    posts.forEach(post => {
+                        const postCategory = (post.getAttribute('data-category') || '').toLowerCase();
+                        const postTags = (post.getAttribute('data-tags') || '').toLowerCase().split(',').map(tag => tag.trim());
+                        
+                        const matchesCategory = selectedCategory === 'all' || postCategory === selectedCategory;
+                        const matchesTag = selectedTag === 'all' || postTags.includes(selectedTag);
+
+                        if (matchesCategory && matchesTag) {
+                            matched.push(post);
+                        } else {
+                            post.style.display = 'none'; // Ensure unmatched are directly hidden
+                        }
+                    });
+
+                    return matched;
+                }
+
+                function renderPosts(matchedPosts) {
+                    // Display according to pagination
+                    matchedPosts.forEach((post, index) => {
+                        if (index < currentlyShown) {
+                            post.style.display = 'block';
+                        } else {
+                            post.style.display = 'none';
+                        }
+                    });
+
+                    // Update Empty State UI
+                    if (matchedPosts.length === 0) {
+                        noDataMessage.classList.remove('hidden');
+                        noDataMessage.classList.add('flex');
+                    } else {
+                        noDataMessage.classList.add('hidden');
+                        noDataMessage.classList.remove('flex');
+                    }
+
+                    // Update Load More Button UI
+                    if (matchedPosts.length > currentlyShown) {
+                        loadMoreBtn.classList.remove('hidden');
+                    } else {
+                        loadMoreBtn.classList.add('hidden');
+                    }
+                }
+
+                function applyFilter(resetPagination = true, updateUrl = true) {
+                    if (resetPagination) {
+                        currentlyShown = ITEMS_PER_PAGE;
+                    }
+                    
+                    const matchedPosts = getMatchedPosts();
+                    renderPosts(matchedPosts);
+
+                    if (updateUrl) {
+                        const selectedCategory = categoryFilter.value.toLowerCase();
+                        const selectedTag = tagFilter.value.toLowerCase();
+                        updateUrlParams(selectedCategory, selectedTag);
+                    }
+                }
+
+                // Handle URL params reading on initial load
+                const urlParams = new URLSearchParams(window.location.search);
+                const urlCategory = urlParams.get('category');
+                const urlTag = urlParams.get('tags');
+                
+                let needsInitialFilter = false;
+
+                if (urlCategory) {
+                    const catOption = Array.from(categoryFilter.options).find(opt => opt.value === urlCategory);
+                    if(catOption) { categoryFilter.value = urlCategory; needsInitialFilter = true; }
+                }
+
+                if (urlTag) {
+                    const tagOption = Array.from(tagFilter.options).find(opt => opt.value === urlTag);
+                    if(tagOption) { tagFilter.value = urlTag; needsInitialFilter = true; }
+                }
+
+                // Initial render
+                applyFilter(true, false);
+
+                // Setup Listeners
+                categoryFilter.addEventListener('change', () => applyFilter(true, true));
+                tagFilter.addEventListener('change', () => applyFilter(true, true));
+                
+                if (loadMoreBtn) {
+                    loadMoreBtn.addEventListener('click', () => {
+                        currentlyShown += ITEMS_PER_PAGE;
+                        applyFilter(false, false);
+                    });
+                }
+            });
+        </script>
 	</body>
 </html>
