@@ -24,33 +24,42 @@ const posts = (await getCollection('blog')).sort(
 				<div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
                     <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">All Posts</h1>
                     
-                    <div class="flex items-center gap-3">
-                        <select id="category-filter" class="cursor-pointer bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-3 py-2 text-sm outline-none">
-                            <option value="all">All Category</option>
-                            <option value="frontend">Frontend</option>
-                            <option value="backend">Backend</option>
-                            <option value="javascript">JavaScript</option>
-                            <option value="dsa">DSA</option>
-                            <option value="system design">System Design</option>
-                            <option value="database">Database</option>
-                        </select>
-                        
-                        <select id="tag-filter" class="cursor-pointer bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-3 py-2 text-sm outline-none">
-                            <option value="all">All Tags</option>
-                            <option value="frontend">Frontend</option>
-                            <option value="backend">Backend</option>
-                            <option value="javascript">JavaScript</option>
-                            <option value="dsa">DSA</option>
-                            <option value="system design">System Design</option>
-                            <option value="database">Database</option>
-                        </select>
+                    <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                        <div class="relative w-full sm:w-64">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            </div>
+                            <input type="text" id="search-input" placeholder="Tìm kiếm tựa bài..." class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 pr-3 py-2 text-sm outline-none transition-colors">
+                        </div>
+
+                        <div class="flex w-full sm:w-auto items-center gap-3">
+                            <select id="category-filter" class="cursor-pointer bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-3 py-2 text-sm outline-none">
+                                <option value="all">All Category</option>
+                                <option value="frontend">Frontend</option>
+                                <option value="backend">Backend</option>
+                                <option value="javascript">JavaScript</option>
+                                <option value="dsa">DSA</option>
+                                <option value="system design">System Design</option>
+                                <option value="database">Database</option>
+                            </select>
+                            
+                            <select id="tag-filter" class="cursor-pointer bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-3 py-2 text-sm outline-none">
+                                <option value="all">All Tags</option>
+                                <option value="frontend">Frontend</option>
+                                <option value="backend">Backend</option>
+                                <option value="javascript">JavaScript</option>
+                                <option value="dsa">DSA</option>
+                                <option value="system design">System Design</option>
+                                <option value="database">Database</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
 				<ul id="posts-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 					{
 						posts.map((post) => (
-							<li class="group post-item" data-category={post.data.category || ''} data-tags={post.data.tags ? post.data.tags.join(',') : ''}>
+							<li class="group post-item" data-title={post.data.title} data-category={post.data.category || ''} data-tags={post.data.tags ? post.data.tags.join(',') : ''}>
 								<a href={`/blog/${post.id}/`} class="block h-full bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl dark:shadow-none border border-slate-200 dark:border-slate-700 transition-all duration-300 hover:-translate-y-1 flex flex-col">
 									<div class="aspect-video w-full overflow-hidden shrink-0">
 										{post.data.heroImage ? (
@@ -116,6 +125,7 @@ const posts = (await getCollection('blog')).sort(
 
         <script is:inline>
             document.addEventListener("DOMContentLoaded", () => {
+                const searchInput = document.getElementById('search-input');
                 const categoryFilter = document.getElementById('category-filter');
                 const tagFilter = document.getElementById('tag-filter');
                 const posts = document.querySelectorAll('.post-item');
@@ -125,7 +135,7 @@ const posts = (await getCollection('blog')).sort(
                 const ITEMS_PER_PAGE = 6;
                 let currentlyShown = ITEMS_PER_PAGE;
 
-                function updateUrlParams(category, tag) {
+                function updateUrlParams(category, tag, search) {
                     const url = new URL(window.location);
                     if (category && category !== 'all') {
                         url.searchParams.set('category', category);
@@ -138,6 +148,12 @@ const posts = (await getCollection('blog')).sort(
                     } else {
                         url.searchParams.delete('tags');
                     }
+
+                    if (search) {
+                        url.searchParams.set('search', search);
+                    } else {
+                        url.searchParams.delete('search');
+                    }
                     
                     window.history.replaceState({}, '', url);
                 }
@@ -145,16 +161,19 @@ const posts = (await getCollection('blog')).sort(
                 function getMatchedPosts() {
                     const selectedCategory = categoryFilter.value.toLowerCase();
                     const selectedTag = tagFilter.value.toLowerCase();
+                    const searchQuery = searchInput.value.trim().toLowerCase();
                     const matched = [];
 
                     posts.forEach(post => {
                         const postCategory = (post.getAttribute('data-category') || '').toLowerCase();
                         const postTags = (post.getAttribute('data-tags') || '').toLowerCase().split(',').map(tag => tag.trim());
+                        const postTitle = (post.getAttribute('data-title') || '').toLowerCase();
                         
                         const matchesCategory = selectedCategory === 'all' || postCategory === selectedCategory;
                         const matchesTag = selectedTag === 'all' || postTags.includes(selectedTag);
+                        const matchesSearch = !searchQuery || postTitle.includes(searchQuery);
 
-                        if (matchesCategory && matchesTag) {
+                        if (matchesCategory && matchesTag && matchesSearch) {
                             matched.push(post);
                         } else {
                             post.style.display = 'none'; // Ensure unmatched are directly hidden
@@ -202,7 +221,8 @@ const posts = (await getCollection('blog')).sort(
                     if (updateUrl) {
                         const selectedCategory = categoryFilter.value.toLowerCase();
                         const selectedTag = tagFilter.value.toLowerCase();
-                        updateUrlParams(selectedCategory, selectedTag);
+                        const searchQuery = searchInput.value.trim();
+                        updateUrlParams(selectedCategory, selectedTag, searchQuery);
                     }
                 }
 
@@ -210,6 +230,7 @@ const posts = (await getCollection('blog')).sort(
                 const urlParams = new URLSearchParams(window.location.search);
                 const urlCategory = urlParams.get('category');
                 const urlTag = urlParams.get('tags');
+                const urlSearch = urlParams.get('search');
                 
                 let needsInitialFilter = false;
 
@@ -223,10 +244,16 @@ const posts = (await getCollection('blog')).sort(
                     if(tagOption) { tagFilter.value = urlTag; needsInitialFilter = true; }
                 }
 
+                if (urlSearch) {
+                    searchInput.value = urlSearch;
+                    needsInitialFilter = true;
+                }
+
                 // Initial render
                 applyFilter(true, false);
 
                 // Setup Listeners
+                searchInput.addEventListener('input', () => applyFilter(true, true));
                 categoryFilter.addEventListener('change', () => applyFilter(true, true));
                 tagFilter.addEventListener('change', () => applyFilter(true, true));
                 
