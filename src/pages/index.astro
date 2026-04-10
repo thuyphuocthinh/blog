@@ -6,9 +6,9 @@ import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="vi">
   <head>
-    <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+    <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} type="website" />
   </head>
   <body
     class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300 min-h-screen flex flex-col"
@@ -21,7 +21,7 @@ import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
         <h1
           class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-6"
         >
-          Welcome to the <span
+          Chào mừng đến với <span
             class="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"
             >TPT Blog</span
           >
@@ -29,24 +29,24 @@ import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
         <p
           class="text-lg md:text-xl text-slate-600 dark:text-slate-300 leading-relaxed mb-8 max-w-2xl"
         >
-          Exploring JavaScript in depth, building full-stack frontend and
-          backend projects, diving into computer science fundamentals,
-          algorithms & data structures, system design concepts, and practical
-          software engineering techniques.
+          Khám phá JavaScript chuyên sâu, xây dựng dự án fullstack frontend và
+          backend, tìm hiểu nền tảng khoa học máy tính, thuật toán & cấu trúc
+          dữ liệu, thiết kế hệ thống, và các kỹ thuật kỹ thuật phần mềm thực tế.
         </p>
         <div class="flex gap-4">
           <a
             href="/blog"
             class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 md:text-lg transition-colors"
           >
-            Read the Blog
+            Đọc Blog
           </a>
           <a
             href="https://github.com/thuyphuocthinh/"
             target="_blank"
+            rel="noopener noreferrer"
             class="inline-flex items-center justify-center px-6 py-3 border border-slate-300 dark:border-slate-700 text-base font-medium rounded-lg text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 md:text-lg transition-colors"
           >
-            View on GitHub
+            GitHub
           </a>
         </div>
       </section>

@@ -6,6 +6,7 @@ import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
+import { SITE_AUTHOR } from '../consts';
 
 type Props = CollectionEntry<'blog'>['data'] & {
 	headings?: MarkdownHeading[];
@@ -17,35 +18,49 @@ const { title, description, pubDate, updatedDate, heroImage, category, tags, hea
 const toc = headings ? headings.filter((h) => h.depth > 1 && h.depth < 4) : [];
 ---
 
-<html lang="en">
+<html lang="vi">
 	<head>
-		<BaseHead title={title} description={description} image={heroImage} />
+		<BaseHead
+			title={title}
+			description={description}
+			image={heroImage}
+			type="article"
+			pubDate={pubDate}
+			updatedDate={updatedDate}
+			tags={tags}
+		/>
 	</head>
 
 	<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 transition-colors duration-300 antialiased">
 		<Header />
 		<main class={`w-full mx-auto px-4 py-8 flex flex-col-reverse md:flex-row gap-8 items-start ${toc.length > 0 ? 'max-w-6xl' : 'max-w-4xl'}`}>
 			<div class={`w-full flex flex-col gap-8 ${toc.length > 0 ? 'md:w-[75%]' : ''}`}>
-				<article class="bg-white dark:bg-slate-800/50 shadow-xl shadow-slate-200/20 dark:shadow-none rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-700/50 transition-colors duration-300">
+				<article class="bg-white dark:bg-slate-800/50 shadow-xl shadow-slate-200/20 dark:shadow-none rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-700/50 transition-colors duration-300" itemscope itemtype="https://schema.org/BlogPosting">
 					<div class="w-full">
-						{heroImage && <Image class="w-full h-auto max-h-[500px] object-cover" width={1020} height={510} src={heroImage} alt="" />}
+						{heroImage && <Image class="w-full h-auto max-h-[500px] object-cover" width={1020} height={510} src={heroImage} alt={`Hình ảnh minh họa cho bài viết: ${title}`} itemprop="image" />}
 					</div>
 					
 					<div class="px-6 py-8 sm:px-10">
 						<div class="mb-8 text-center">
 							<div class="text-sm font-medium text-blue-600 dark:text-blue-400 mb-3 uppercase tracking-wider">
-								<FormattedDate date={pubDate} />
+								<time datetime={pubDate.toISOString()} itemprop="datePublished">
+									<FormattedDate date={pubDate} />
+								</time>
 								{
 									updatedDate && (
 										<span class="italic ml-2 opacity-75">
-											(Cập nhật: <FormattedDate date={updatedDate} />)
+											(Cập nhật: <time datetime={updatedDate.toISOString()} itemprop="dateModified"><FormattedDate date={updatedDate} /></time>)
 										</span>
 									)
 								}
 							</div>
-							<h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight mb-6">
+							<h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight mb-6" itemprop="headline">
 								{title}
 							</h1>
+							<p class="sr-only" itemprop="description">{description}</p>
+							<span class="sr-only" itemprop="author" itemscope itemtype="https://schema.org/Person">
+								<span itemprop="name">{SITE_AUTHOR}</span>
+							</span>
 
 							<div class="flex flex-wrap justify-center gap-2 mb-8">
 								{category && (
@@ -63,7 +78,7 @@ const toc = headings ? headings.filter((h) => h.depth > 1 && h.depth < 4) : [];
 							<hr class="w-16 h-1 mx-auto bg-blue-500 rounded-full border-none" />
 						</div>
 
-						<div class="prose prose-lg prose-slate dark:prose-invert max-w-none prose-headings:font-bold prose-a:text-blue-600 dark:prose-a:text-blue-400 hover:prose-a:text-blue-500 prose-img:rounded-xl">
+						<div class="prose prose-lg prose-slate dark:prose-invert max-w-none prose-headings:font-bold prose-a:text-blue-600 dark:prose-a:text-blue-400 hover:prose-a:text-blue-500 prose-img:rounded-xl" itemprop="articleBody">
 							<slot />
 						</div>
 					</div>
@@ -71,7 +86,7 @@ const toc = headings ? headings.filter((h) => h.depth > 1 && h.depth < 4) : [];
 
 				{relatedPosts && relatedPosts.length > 0 && (
 					<div class="mt-8 border-t-2 border-slate-100 dark:border-slate-800 pt-8">
-						<h3 class="text-2xl font-extrabold mb-8 text-slate-900 dark:text-white">Related Posts</h3>
+						<h2 class="text-2xl font-extrabold mb-8 text-slate-900 dark:text-white">Bài viết liên quan</h2>
 						<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
 							{relatedPosts.map((rp) => (
 								<a href={`/blog/${rp.id}/`} class="group flex flex-col bg-slate-50 dark:bg-slate-800/80 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700/50">
@@ -81,7 +96,7 @@ const toc = headings ? headings.filter((h) => h.depth > 1 && h.depth < 4) : [];
 										<div class="w-full h-40 bg-slate-200 dark:bg-slate-700"></div>
 									)}
 									<div class="p-5 flex-1 flex flex-col">
-										<h4 class="font-bold text-lg mb-2 text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">{rp.data.title}</h4>
+										<h3 class="font-bold text-lg mb-2 text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">{rp.data.title}</h3>
 										<p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mt-auto">{rp.data.description}</p>
 									</div>
 								</a>
@@ -96,42 +111,46 @@ const toc = headings ? headings.filter((h) => h.depth > 1 && h.depth < 4) : [];
 					<!-- Mobile TOC (Collapsible) -->
 					<details class="md:hidden bg-slate-50 dark:bg-slate-800/80 p-5 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm group">
 						<summary class="font-bold text-base uppercase tracking-wider text-slate-800 dark:text-slate-200 flex justify-between items-center cursor-pointer list-none">
-							Table of Contents
+							Mục lục
 							<svg class="w-5 h-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
 						</summary>
-						<ul class="mt-4 space-y-2 text-sm border-l-2 border-slate-200 dark:border-slate-700 pt-2">
-							{toc.map((heading) => (
-								<li>
-									<a 
-										href={`#${heading.slug}`} 
-										class="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-600 dark:hover:border-blue-400 block transition-colors border-l-2 -ml-[2px] border-transparent py-1"
-										style={`padding-left: ${(heading.depth - 1) * 0.75}rem`}
-									>
-										{heading.text}
-									</a>
-								</li>
-							))}
-						</ul>
+						<nav aria-label="Mục lục bài viết">
+							<ul class="mt-4 space-y-2 text-sm border-l-2 border-slate-200 dark:border-slate-700 pt-2">
+								{toc.map((heading) => (
+									<li>
+										<a 
+											href={`#${heading.slug}`} 
+											class="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-600 dark:hover:border-blue-400 block transition-colors border-l-2 -ml-[2px] border-transparent py-1"
+											style={`padding-left: ${(heading.depth - 1) * 0.75}rem`}
+										>
+											{heading.text}
+										</a>
+									</li>
+								))}
+							</ul>
+						</nav>
 					</details>
 
 					<!-- Desktop TOC (Sticky) -->
 					<div class="hidden md:block bg-white dark:bg-slate-800/50 p-5 rounded-2xl border border-slate-100 dark:border-slate-700/50 shadow-sm not-prose">
-						<h3 class="font-bold text-sm uppercase tracking-wider mb-4 text-slate-800 dark:text-slate-200">
-							Table of Contents
-						</h3>
-						<ul class="space-y-1.5 text-sm border-l-2 border-slate-100 dark:border-slate-700">
-							{toc.map((heading) => (
-								<li>
-									<a 
-										href={`#${heading.slug}`} 
-										class="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-600 dark:hover:border-blue-400 block transition-colors border-l-2 -ml-[2px] border-transparent py-1"
-										style={`padding-left: ${(heading.depth - 1) * 0.75}rem`}
-									>
-										{heading.text}
-									</a>
-								</li>
-							))}
-						</ul>
+						<h2 class="font-bold text-sm uppercase tracking-wider mb-4 text-slate-800 dark:text-slate-200">
+							Mục lục
+						</h2>
+						<nav aria-label="Mục lục bài viết">
+							<ul class="space-y-1.5 text-sm border-l-2 border-slate-100 dark:border-slate-700">
+								{toc.map((heading) => (
+									<li>
+										<a 
+											href={`#${heading.slug}`} 
+											class="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-600 dark:hover:border-blue-400 block transition-colors border-l-2 -ml-[2px] border-transparent py-1"
+											style={`padding-left: ${(heading.depth - 1) * 0.75}rem`}
+										>
+											{heading.text}
+										</a>
+									</li>
+								))}
+							</ul>
+						</nav>
 					</div>
 				</aside>
 			)}

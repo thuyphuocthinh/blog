@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
 
+# Disallow non-content paths
+Disallow: /_astro/
+
+# Sitemap
 Sitemap: https://tpt.io.vn/sitemap-index.xml
