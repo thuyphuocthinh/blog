@@ -10,6 +10,13 @@ import { SITE_DESCRIPTION, SITE_TITLE } from "../../consts";
 const posts = (await getCollection("blog")).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
+
+const allCategories = [
+  ...new Set(posts.map((post) => post.data.category).filter(Boolean)),
+];
+const allTags = [
+  ...new Set(posts.flatMap((post) => post.data.tags || [])),
+].filter(Boolean);
 ---
 
 <!doctype html>
@@ -63,28 +70,26 @@ const posts = (await getCollection("blog")).sort(
             <div class="flex w-full sm:w-auto items-center gap-3">
               <select
                 id="category-filter"
-                class="cursor-pointer bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-3 py-2 text-sm outline-none"
+                class="cursor-pointer bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-3 py-2 text-sm outline-none capitalize"
               >
                 <option value="all">All Category</option>
-                <option value="frontend">Frontend</option>
-                <option value="backend">Backend</option>
-                <option value="javascript">JavaScript</option>
-                <option value="dsa">DSA</option>
-                <option value="system design">System Design</option>
-                <option value="database">Database</option>
+                {
+                  allCategories.map((cat) => (
+                    <option value={cat!.toLowerCase()}>{cat}</option>
+                  ))
+                }
               </select>
 
               <select
                 id="tag-filter"
-                class="cursor-pointer bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-3 py-2 text-sm outline-none"
+                class="cursor-pointer bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-3 py-2 text-sm outline-none capitalize"
               >
                 <option value="all">All Tags</option>
-                <option value="frontend">Frontend</option>
-                <option value="backend">Backend</option>
-                <option value="javascript">JavaScript</option>
-                <option value="dsa">DSA</option>
-                <option value="system design">System Design</option>
-                <option value="database">Database</option>
+                {
+                  allTags.map((tag) => (
+                    <option value={tag.toLowerCase()}>#{tag}</option>
+                  ))
+                }
               </select>
             </div>
           </div>
